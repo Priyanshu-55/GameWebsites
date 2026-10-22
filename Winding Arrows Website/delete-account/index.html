@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delete account | Winding Arrows</title>
+  <meta name="description" content="Ask TS Gaming to delete a Winding Arrows account. You can also use Delete account in the game's Settings.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; --bg: #1B1E23; --card: #24272E; --raised: #2C3038; --text: #fff; --muted: #B8C0CA; --line: #3B3F49; --accent: #B44CFF; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: "Nunito Sans", sans-serif; line-height: 1.65; }
+    header, main, footer { width: min(760px, calc(100% - 2rem)); margin-inline: auto; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 0; }
+    a { color: var(--accent); }
+    h1, h2 { font-family: Fredoka, sans-serif; line-height: 1.2; }
+    h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0.2rem 0 0.5rem; }
+    .kicker { letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 800; color: var(--accent); }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 1.5rem; }
+    label { display: block; font-weight: 800; margin-top: 1rem; }
+    input, select, textarea { width: 100%; box-sizing: border-box; margin-top: 0.35rem; padding: 0.8rem 0.9rem; border-radius: 14px; border: 1px solid var(--line); background: var(--raised); color: var(--text); font: inherit; }
+    button { margin-top: 1.25rem; border: 0; border-radius: 999px; background: var(--accent); color: #fff; font: inherit; font-weight: 800; min-height: 52px; padding: 0 1.4rem; cursor: pointer; }
+    footer { padding: 2rem 0 3rem; color: var(--muted); }
+    nav { display: flex; gap: 1rem; font-weight: 700; }
+    .note { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/"><img src="/assets/logo_sideby.png" alt="Winding Arrows" style="height:56px;width:auto"></a>
+    <nav>
+      <a href="/privacy">Privacy</a>
+      <a href="mailto:tsgamings2dio@gmail.com">Contact</a>
+    </nav>
+  </header>
+  <main class="card">
+    <p class="kicker">Delete account</p>
+    <h1>Ask us to delete your records</h1>
+    <p>In the game, Settings has <strong>Delete account</strong>. After you confirm, the game deletes the records it can reach while you are still signed in.</p>
+    <p>If you cannot use that button, send this request. It opens an email to <a href="mailto:tsgamings2dio@gmail.com">tsgamings2dio@gmail.com</a> with the subject “Winding Arrows privacy”.</p>
+    <form id="delete-form">
+      <label for="name">Display name</label>
+      <input id="name" name="name" required maxlength="18" autocomplete="nickname">
+      <label for="kind">How you play</label>
+      <select id="kind" name="kind">
+        <option>Google</option>
+        <option>Guest</option>
+        <option>Not sure</option>
+      </select>
+      <label for="email">Google email, if you used Google</label>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="Optional">
+      <label for="note">Anything else we should match</label>
+      <textarea id="note" name="note" rows="4" placeholder="Optional"></textarea>
+      <button type="submit">Email this request</button>
+      <p class="note" id="form-status" role="status"></p>
+    </form>
+  </main>
+  <footer>
+    <a href="/">Home</a> · <a href="/privacy">Privacy</a> · <a href="mailto:tsgamings2dio@gmail.com">tsgamings2dio@gmail.com</a>
+  </footer>
+  <script>
+    document.getElementById("delete-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const kind = document.getElementById("kind").value;
+      const email = document.getElementById("email").value.trim();
+      const note = document.getElementById("note").value.trim();
+      const body = [
+        "Please delete my Winding Arrows records.",
+        "",
+        "Display name: " + name,
+        "Account: " + kind,
+        "Google email: " + (email || "(not provided)"),
+        "Note: " + (note || "(none)")
+      ].join("\n");
+      const href = "mailto:tsgamings2dio@gmail.com?subject=" + encodeURIComponent("Winding Arrows privacy") + "&body=" + encodeURIComponent(body);
+      document.getElementById("form-status").textContent = "Opening your email app.";
+      window.location.href = href;
+    });
+  </script>
+</body>
+</html>

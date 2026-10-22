@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Winding Arrows | Tap a clear arrow</title>
+  <meta name="description" content="Winding Arrows is a picture puzzle for phones and tablets. Tap a clear arrow, clear the board, and finish Easy in 2 minutes, Medium in 6, or Hard in 10 for 50% extra coins.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0,0" rel="stylesheet">
+  <link rel="stylesheet" href="motion.css">
+  <script>
+    /* Safety net: if the motion layer has not started within 4s, show everything. */
+    setTimeout(function () {
+      var r = document.documentElement.classList;
+      if (!r.contains("m-ready")) r.add("m-fail");
+    }, 4000);
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            canvas: "rgb(var(--canvas) / <alpha-value>)",
+            surface: "rgb(var(--surface) / <alpha-value>)",
+            raised: "rgb(var(--raised) / <alpha-value>)",
+            ink: "rgb(var(--ink) / <alpha-value>)",
+            muted: "rgb(var(--muted) / <alpha-value>)",
+            accent: "rgb(var(--accent) / <alpha-value>)",
+            "accent-hover": "rgb(var(--accent-hover) / <alpha-value>)",
+            line: "rgb(var(--line) / <alpha-value>)",
+            soft: "rgb(var(--soft) / <alpha-value>)",
+            mint: "#06D6A0",
+            cyan: "#4CC9F0",
+            gold: "#FFD166",
+            coral: "#FF6B6B",
+            violet: "#8A5CFF",
+            blue: "#4F7CFF",
+            pink: "#FF70A6"
+          },
+          fontFamily: {
+            display: ["Fredoka", "ui-rounded", "sans-serif"],
+            body: ["Nunito Sans", "ui-sans-serif", "sans-serif"]
+          },
+          boxShadow: {
+            card: "0 16px 40px rgba(10, 12, 16, 0.18)",
+            glow: "0 12px 36px rgb(var(--accent) / 0.28)"
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    html.dark {
+      color-scheme: dark;
+      --canvas: 27 30 35;
+      --surface: 36 39 46;
+      --raised: 44 48 56;
+      --ink: 255 255 255;
+      --muted: 184 192 202;
+      --accent: 180 76 255;
+      --accent-hover: 199 107 255;
+      --line: 59 63 73;
+      --soft: 58 36 75;
+    }
+    html.light {
+      color-scheme: light;
+      --canvas: 255 253 251;
+      --surface: 255 255 255;
+      --raised: 255 248 242;
+      --ink: 26 31 38;
+      --muted: 90 101 112;
+      --accent: 255 106 0;
+      --accent-hover: 232 92 0;
+      --line: 232 220 210;
+      --soft: 255 224 194;
+    }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: rgb(var(--canvas)); }
+    ::selection { background: rgb(var(--accent) / 0.35); color: rgb(var(--ink)); }
+    .material-symbols-outlined { font-variation-settings: "FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24; }
+    .bg-video, .page-scrim { position: fixed; inset: 0; width: 100%; height: 100%; }
+    .bg-video { object-fit: cover; z-index: -20; }
+    .page-scrim { z-index: -10; }
+    html.dark .page-scrim {
+      background:
+        radial-gradient(680px 340px at 74% 22%, rgb(var(--accent) / 0.2), transparent 64%),
+        linear-gradient(180deg, rgba(18, 19, 24, 0.9), rgba(18, 19, 24, 0.86) 36%, rgba(18, 19, 24, 0.94));
+    }
+    html.light .page-scrim {
+      background:
+        radial-gradient(680px 320px at 74% 16%, rgb(var(--accent) / 0.14), transparent 62%),
+        linear-gradient(180deg, rgba(255, 253, 251, 0.94), rgba(255, 246, 238, 0.92) 40%, rgba(247, 242, 255, 0.96));
+    }
+    [hidden] { display: none !important; }
+    .section-anchor { scroll-margin-top: 6rem; }
+    .nav-link[aria-current="page"] { color: rgb(var(--accent)); }
+    .mode-card.is-active { border-color: rgb(var(--accent)); transform: translateY(-2px); }
+    dialog::backdrop { background: rgba(10, 12, 16, 0.72); }
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    html.light .text-gold { color: #8A6400; }
+    html.light .text-cyan { color: #0C6F8C; }
+    html.light .text-mint { color: #06784F; }
+    html.light .text-pink { color: #B4236A; }
+    html.light .text-coral { color: #B42330; }
+    .asset { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .store-pending {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: 52px;
+      padding: 0 1.25rem;
+      border-radius: 9999px;
+      border: 1px solid rgb(var(--line));
+      background: rgb(var(--raised));
+      color: rgb(var(--muted));
+      font-size: 0.875rem;
+      font-weight: 800;
+      cursor: not-allowed;
+    }
+    .play-stage { display: block; width: 100%; height: 100%; }
+    .play-stage .tube { stroke: rgb(var(--accent)); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+    .play-stage .chev { fill: rgb(var(--accent)); }
+    .play-stage .hand { fill: rgb(var(--ink)); }
+    .play-stage .pop { fill: rgb(var(--accent)); font-family: Fredoka, sans-serif; font-size: 18px; font-weight: 700; opacity: 0; }
+    .demo-clear .leave { animation: slide-east 7s ease-in-out infinite; }
+    .demo-clear .near-a { animation: near-out 7s ease-in-out infinite; }
+    .demo-clear .near-b { animation: near-in 7s ease-in-out infinite; opacity: 0; }
+    .demo-clear .hand { animation: hand-clear 7s ease-in-out infinite; transform-origin: 0 0; }
+    .demo-block .blocked { animation: blocked-shake 6.2s ease-in-out infinite; transform-origin: 80px 100px; }
+    .demo-block .hand { animation: hand-block 6.2s ease-in-out infinite; transform-origin: 0 0; }
+    .demo-block .heart-intact { animation: heart-intact 6.2s ease-in-out infinite; transform-origin: 12px 11px; transform-box: fill-box; }
+    .demo-block .heart-cracked { animation: heart-cracked 6.2s ease-in-out infinite; transform-origin: 12px 11px; transform-box: fill-box; opacity: 0; }
+    .demo-boss .you { animation: slide-east 7.4s ease-in-out infinite; }
+    .demo-boss .boss { animation: slide-north 7.4s ease-in-out infinite; }
+    .demo-boss .hand { animation: hand-boss 7.4s ease-in-out infinite; transform-origin: 0 0; }
+    .demo-boss .pop-you { animation: pop-you 7.4s ease-out infinite; }
+    .demo-boss .pop-boss { animation: pop-boss 7.4s ease-out infinite; }
+    @keyframes slide-east {
+      0%, 34% { transform: none; opacity: 1; }
+      52% { transform: translateX(78px); opacity: 0; }
+      86% { transform: translateX(78px); opacity: 0; }
+      100% { transform: none; opacity: 1; }
+    }
+    @keyframes slide-north {
+      0%, 58% { transform: none; opacity: 1; }
+      76% { transform: translateY(-64px); opacity: 0; }
+      90% { transform: translateY(-64px); opacity: 0; }
+      100% { transform: none; opacity: 1; }
+    }
+    @keyframes near-out {
+      0%, 46% { opacity: 1; }
+      58%, 86% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    @keyframes near-in {
+      0%, 46% { opacity: 0; }
+      58%, 86% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    @keyframes hand-clear {
+      0%, 12% { transform: translate(250px, 140px) scale(0.72); opacity: 0; }
+      22% { transform: translate(200px, 2px) scale(0.72); opacity: 1; }
+      30% { transform: translate(200px, 10px) scale(0.64); opacity: 1; }
+      40% { transform: translate(200px, 0px) scale(0.72); opacity: 0; }
+      100% { transform: translate(250px, 140px) scale(0.72); opacity: 0; }
+    }
+    @keyframes hand-block {
+      0%, 10% { transform: translate(20px, 150px) scale(0.72); opacity: 0; }
+      20% { transform: translate(78px, 78px) scale(0.72); opacity: 1; }
+      30% { transform: translate(78px, 88px) scale(0.64); opacity: 1; }
+      48% { transform: translate(78px, 74px) scale(0.72); opacity: 1; }
+      60%, 100% { transform: translate(20px, 150px) scale(0.72); opacity: 0; }
+    }
+    @keyframes hand-boss {
+      0%, 10% { transform: translate(250px, 140px) scale(0.72); opacity: 0; }
+      20% { transform: translate(198px, 8px) scale(0.72); opacity: 1; }
+      30% { transform: translate(198px, 16px) scale(0.64); opacity: 1; }
+      40% { transform: translate(198px, 6px) scale(0.72); opacity: 0; }
+      100% { transform: translate(250px, 140px) scale(0.72); opacity: 0; }
+    }
+    @keyframes blocked-shake {
+      0%, 28% { transform: none; }
+      32% { transform: translateX(-4px); }
+      36% { transform: translateX(4px); }
+      40% { transform: translateX(-3px); }
+      44% { transform: translateX(2px); }
+      50%, 100% { transform: none; }
+    }
+    @keyframes heart-intact {
+      0%, 30% { opacity: 1; transform: none; }
+      38% { opacity: 1; transform: scale(1.25); }
+      48%, 100% { opacity: 0; transform: scale(0.86); }
+    }
+    @keyframes heart-cracked {
+      0%, 36% { opacity: 0; transform: scale(1.12); }
+      46% { opacity: 1; transform: rotate(-12deg); }
+      70%, 84% { opacity: 1; transform: translate(4px, 7px) rotate(14deg); }
+      100% { opacity: 0; }
+    }
+    @keyframes pop-you {
+      0%, 36% { opacity: 0; transform: translateY(6px); }
+      46%, 58% { opacity: 1; transform: none; }
+      70%, 100% { opacity: 0; transform: translateY(-8px); }
+    }
+    @keyframes pop-boss {
+      0%, 60% { opacity: 0; transform: translateY(6px); }
+      70%, 82% { opacity: 1; transform: none; }
+      92%, 100% { opacity: 0; transform: translateY(-8px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .bg-video { display: none; }
+      .mode-card { transition: none; }
+      .play-stage, .play-stage * { animation: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-canvas font-body text-ink antialiased">
+  <a class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[80] focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-white" href="#content">Skip to content</a>
+
+  <video class="bg-video" id="bg-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+    <source src="/media/winding-arrows.mp4" type="video/mp4">
+  </video>
+  <div class="page-scrim" aria-hidden="true"></div>
+
+  <header class="fixed top-0 left-0 z-50 w-full border-b border-line/80 bg-canvas/80 backdrop-blur-md">
+    <div class="mx-auto flex h-20 max-w-[1200px] items-center justify-between gap-4 px-4 md:px-6">
+      <a class="flex shrink-0 items-center" href="#home">
+        <img class="h-16 w-auto" src="assets/logo_sideby.png" alt="Winding Arrows">
+      </a>
+
+      <nav class="hidden items-center gap-6 lg:flex" aria-label="Primary">
+        <a class="nav-link text-sm font-bold text-muted transition-colors hover:text-ink" aria-current="page" href="#home">Home</a>
+        <a class="nav-link text-sm font-bold text-muted transition-colors hover:text-ink" href="#mechanics">How to Play</a>
+        <a class="nav-link text-sm font-bold text-muted transition-colors hover:text-ink" href="#features">Accounts</a>
+        <a class="nav-link text-sm font-bold text-muted transition-colors hover:text-ink" href="#power-ups">Powers</a>
+        <a class="nav-link text-sm font-bold text-muted transition-colors hover:text-ink" href="#modes">Modes</a>
+        <a class="nav-link text-sm font-bold text-muted transition-colors hover:text-ink" href="#about">Support</a>
+        <a class="nav-link text-sm font-bold text-muted transition-colors hover:text-ink" href="#faq">FAQ</a>
+      </nav>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button class="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-raised text-muted transition-colors hover:text-ink" id="theme-toggle" type="button" aria-label="Switch to light theme">
+          <span class="material-symbols-outlined text-[22px]" id="theme-icon">light_mode</span>
+        </button>
+        <a class="hidden h-11 items-center justify-center rounded-full bg-accent px-5 text-sm font-extrabold text-white shadow-glow transition-colors hover:bg-accent-hover sm:inline-flex" href="#mechanics">How to Play</a>
+        <button class="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-raised text-ink lg:hidden" id="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">
+          <span class="material-symbols-outlined" id="menu-icon">menu</span>
+          <span class="sr-only">Open menu</span>
+        </button>
+      </div>
+    </div>
+    <div class="m-menu border-t border-line bg-canvas/95 lg:hidden" id="mobile-menu" data-open="false">
+      <nav class="mx-auto flex max-w-[1200px] flex-col px-4 py-3" aria-label="Mobile">
+        <a class="mobile-link rounded-xl px-3 py-3 text-base font-bold hover:bg-raised" href="#home">Home</a>
+        <a class="mobile-link rounded-xl px-3 py-3 text-base font-bold hover:bg-raised" href="#mechanics">How to Play</a>
+        <a class="mobile-link rounded-xl px-3 py-3 text-base font-bold hover:bg-raised" href="#features">Accounts</a>
+        <a class="mobile-link rounded-xl px-3 py-3 text-base font-bold hover:bg-raised" href="#power-ups">Powers</a>
+        <a class="mobile-link rounded-xl px-3 py-3 text-base font-bold hover:bg-raised" href="#modes">Modes</a>
+        <a class="mobile-link rounded-xl px-3 py-3 text-base font-bold hover:bg-raised" href="#about">Support</a>
+        <a class="mobile-link rounded-xl px-3 py-3 text-base font-bold hover:bg-raised" href="#faq">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content" class="pt-20">
+    <section class="section-anchor relative mx-auto grid max-w-[1200px] items-center gap-10 px-4 pb-20 pt-10 md:px-6 lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-16" id="home">
+      <div class="rounded-[28px] bg-canvas/80 p-6 backdrop-blur-md lg:col-span-6 md:p-8">
+        <p class="inline-flex items-center gap-2 rounded-full border border-line bg-raised/90 px-3 py-1 text-xs font-extrabold uppercase tracking-[0.14em] text-accent">
+          <span class="h-2 w-2 rounded-full bg-accent"></span>
+          Picture puzzle
+        </p>
+        <h1 class="mt-5 font-display text-[clamp(2.6rem,5vw,4rem)] font-bold leading-[1.05] tracking-[-0.03em]">
+          Tap a clear arrow. Clear the board.
+        </h1>
+        <p class="mt-5 max-w-xl text-lg leading-relaxed text-muted">
+          Winding arrows fill a picture. Tap one whose path is open, spend a heart if it is blocked, and clear every arrow.
+        </p>
+        <div class="mt-7 flex flex-wrap items-center gap-3">
+          <button class="inline-flex h-[52px] items-center justify-center rounded-full bg-accent px-6 text-base font-extrabold text-white shadow-glow transition-colors hover:bg-accent-hover" id="open-video-preview" type="button">
+            <span class="material-symbols-outlined mr-2 text-[22px]">play_circle</span>
+            Watch gameplay
+          </button>
+          <a class="inline-flex h-[52px] items-center justify-center rounded-full border border-line bg-surface px-6 text-base font-extrabold text-ink transition-colors hover:bg-raised" href="#mechanics">
+            How to play
+            <span class="material-symbols-outlined ml-2 text-[20px]">arrow_forward</span>
+          </a>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-3" aria-label="Store listings">
+          <span class="store-pending" role="note">Google Play · link not published</span>
+          <span class="store-pending" role="note">App Store · link not published</span>
+        </div>
+        <div class="mt-8 grid gap-4 border-t border-line pt-6 sm:grid-cols-3">
+          <div>
+            <p class="flex items-center gap-2 text-sm font-extrabold"><span class="h-1.5 w-1.5 rounded-full bg-accent"></span>Easy · 2 min</p>
+            <p class="mt-1 text-sm leading-relaxed text-muted">Finish a normal level in time for 50% extra coins.</p>
+          </div>
+          <div>
+            <p class="flex items-center gap-2 text-sm font-extrabold"><span class="h-1.5 w-1.5 rounded-full bg-mint"></span>Medium · 6 min</p>
+            <p class="mt-1 text-sm leading-relaxed text-muted">Medium gives you 6 minutes for the same 50% extra coins.</p>
+          </div>
+          <div>
+            <p class="flex items-center gap-2 text-sm font-extrabold"><span class="h-1.5 w-1.5 rounded-full bg-coral"></span>Hard · 10 min</p>
+            <p class="mt-1 text-sm leading-relaxed text-muted">A blocked tap still costs a heart.</p>
+          </div>
+        </div>
+        <button class="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-muted hover:text-ink" id="bg-toggle" type="button">
+          <span class="material-symbols-outlined text-[18px]" id="bg-toggle-icon">pause</span>
+          <span id="bg-toggle-label">Pause background</span>
+        </button>
+      </div>
+
+      <div class="lg:col-span-6">
+        <div class="mx-auto w-full max-w-[340px]">
+          <p class="mb-3 flex items-center justify-between gap-3 px-1">
+            <span class="inline-flex items-center gap-1.5 text-sm font-extrabold">
+              <span class="material-symbols-outlined text-[18px] text-accent">smartphone</span>
+              Interactive preview
+            </span>
+            <a class="shrink-0 text-sm font-bold text-accent hover:text-accent-hover" href="/playable/" target="_blank" rel="noopener">Open full size</a>
+          </p>
+          <figure class="m-0">
+          <div class="rounded-[32px] border border-line bg-surface p-2 shadow-card">
+            <div class="relative overflow-hidden rounded-[24px] bg-[#1B1E23]" style="aspect-ratio: 9 / 16;">
+              <iframe class="pointer-events-none absolute inset-0 h-full w-full border-0" id="preview-frame" title="Interactive Winding Arrows preview" src="/playable/" loading="eager"></iframe>
+              <button class="absolute inset-0 flex flex-col items-center justify-end bg-gradient-to-t from-[#121318] via-[#121318]/20 to-transparent p-6 text-white" id="preview-gate" type="button">
+                <span class="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-white shadow-glow">
+                  <span class="material-symbols-outlined text-[30px]">touch_app</span>
+                </span>
+                <span class="font-display text-xl font-bold">Tap to play the preview</span>
+                <span class="mt-1 text-sm text-white/80">The page stays scrollable until you start.</span>
+              </button>
+            </div>
+          </div>
+          </figure>
+          <div class="pointer-events-auto mt-3 flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-2" id="preview-bar" hidden>
+            <p class="text-sm font-bold">Preview is interactive</p>
+            <button class="text-sm font-extrabold text-accent" id="preview-release" type="button">Back to page</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-anchor border-y border-line bg-canvas py-16 md:py-24" id="mechanics">
+      <div class="mx-auto max-w-[1200px] px-4 md:px-6">
+        <div class="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div class="max-w-2xl">
+            <p class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-accent">
+              <span class="material-symbols-outlined text-[18px]">alt_route</span>
+              How to play
+            </p>
+            <h2 class="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl">Tap a clear arrow. Keep your hearts.</h2>
+            <p class="mt-4 text-lg leading-relaxed text-muted">An arrow leaves when the lane in front of its head is empty. A blocked tap costs one heart. Clear the board to win the level.</p>
+          </div>
+        </div>
+
+        <div class="mt-10 grid gap-5 md:grid-cols-3">
+          <article class="flex flex-col rounded-3xl border border-line bg-surface p-6">
+            <div class="flex items-center justify-end border-b border-line pb-4">
+              <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-raised text-accent"><img class="asset" src="assets/power-arrow.png" alt=""></span>
+            </div>
+            <div class="my-4 h-44 overflow-hidden rounded-2xl border border-line bg-canvas">
+              <svg class="play-stage demo-clear" viewBox="0 0 280 160" aria-hidden="true">
+                <g>
+                  <g>
+                    <path class="tube" d="M 188 142 H 236 Q 246 142 246 132 V 86 Q 246 76 236 76 H 214"></path>
+                    <polygon class="chev" points="198,76 214,68 214,84"></polygon>
+                  </g>
+                  <g>
+                    <path class="tube" d="M 124 142 H 168"></path>
+                    <polygon class="chev" points="184,142 168,134 168,150"></polygon>
+                  </g>
+                  <g class="near-a">
+                    <path class="tube" d="M 18 142 H 66 Q 76 142 76 132 V 124 Q 76 114 86 114 H 150"></path>
+                    <polygon class="chev" points="166,114 150,106 150,122"></polygon>
+                  </g>
+                  <g class="near-b">
+                    <path class="tube" d="M 18 142 V 96 Q 18 86 28 86 H 70 Q 80 86 80 76 V 58 Q 80 48 90 48 H 140"></path>
+                    <polygon class="chev" points="156,48 140,40 140,56"></polygon>
+                  </g>
+                  <g class="leave">
+                    <path class="tube" d="M 18 78 V 58 Q 18 48 28 48 H 66 Q 76 48 76 38 V 28 Q 76 18 86 18 H 200"></path>
+                    <polygon class="chev" points="216,18 200,10 200,26"></polygon>
+                  </g>
+                  <g class="hand">
+                    <rect x="-6" y="0" width="12" height="26" rx="6"></rect>
+                    <rect x="-14" y="18" width="32" height="20" rx="10"></rect>
+                  </g>
+                </g>
+              </svg>
+            </div>
+            <h3 class="font-display text-2xl font-semibold">Clear one arrow</h3>
+            <p class="mt-2 leading-relaxed text-muted">The arrow crawls off along its own body. Arrows nearby can change their shape once that space opens.</p>
+          </article>
+
+          <article class="flex flex-col rounded-3xl border border-line bg-surface p-6">
+            <div class="flex items-center justify-end border-b border-line pb-4">
+              <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-raised text-accent"><img class="asset" src="assets/power-eye.png" alt=""></span>
+            </div>
+            <div class="my-4 h-44 overflow-hidden rounded-2xl border border-line bg-canvas">
+              <svg class="play-stage demo-block" viewBox="0 0 280 160" aria-hidden="true">
+                <g>
+                  <g fill="#FF6B6B">
+                    <path d="M12 19s-7-4.2-9.2-8.2C1 7.8 2.2 4.4 5.4 3.6 7.4 3 9.2 3.8 12 6.4c2.8-2.6 4.6-3.4 6.6-2.8 3.2.8 4.4 4.2 2.6 7.2C19 14.8 12 19 12 19z" transform="translate(14,8) scale(0.85)"></path>
+                    <path d="M12 19s-7-4.2-9.2-8.2C1 7.8 2.2 4.4 5.4 3.6 7.4 3 9.2 3.8 12 6.4c2.8-2.6 4.6-3.4 6.6-2.8 3.2.8 4.4 4.2 2.6 7.2C19 14.8 12 19 12 19z" transform="translate(40,8) scale(0.85)"></path>
+                    <g transform="translate(66,8) scale(0.85)">
+                      <g class="heart-intact"><path d="M12 19s-7-4.2-9.2-8.2C1 7.8 2.2 4.4 5.4 3.6 7.4 3 9.2 3.8 12 6.4c2.8-2.6 4.6-3.4 6.6-2.8 3.2.8 4.4 4.2 2.6 7.2C19 14.8 12 19 12 19z"></path></g>
+                      <g class="heart-cracked">
+                        <path d="M12 19s-7-4.2-9.2-8.2C1 7.8 2.2 4.4 5.4 3.6 7.4 3 9.2 3.8 12 6.4c2.8-2.6 4.6-3.4 6.6-2.8 3.2.8 4.4 4.2 2.6 7.2C19 14.8 12 19 12 19z"></path>
+                        <path fill="none" d="M12 4 L8.5 9.5 L13 11.5 L7.5 17" stroke="#1B1E23" stroke-width="1.7" stroke-linecap="round"></path>
+                      </g>
+                    </g>
+                  </g>
+                  <g>
+                    <path class="tube" d="M 196 36 H 236 Q 246 36 246 46 V 90"></path>
+                    <polygon class="chev" points="246,106 237,90 255,90"></polygon>
+                  </g>
+                  <g>
+                    <path class="tube" d="M 150 28 V 128 Q 150 138 160 138 H 230"></path>
+                    <polygon class="chev" points="246,138 230,130 230,146"></polygon>
+                  </g>
+                  <g class="blocked">
+                    <path class="tube" d="M 18 130 V 110 Q 18 100 28 100 H 124"></path>
+                    <polygon class="chev" points="146,100 128,92 128,108"></polygon>
+                  </g>
+                  <g class="hand">
+                    <rect x="-6" y="0" width="12" height="26" rx="6"></rect>
+                    <rect x="-14" y="18" width="32" height="20" rx="10"></rect>
+                  </g>
+                </g>
+              </svg>
+            </div>
+            <h3 class="font-display text-2xl font-semibold">Hearts, then an empty board</h3>
+            <p class="mt-2 leading-relaxed text-muted">A tap on an arrow that cannot leave breaks one heart. Keep clearing until every arrow has left the picture. Easy, Medium, and Hard give you 2, 6, and 10 minutes, and finishing in time adds 50% extra coins.</p>
+          </article>
+
+          <article class="flex flex-col rounded-3xl border border-line bg-surface p-6">
+            <div class="flex items-center justify-end border-b border-line pb-4">
+              <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-raised"><img class="asset" src="assets/mode-boss.png" alt=""></span>
+            </div>
+            <div class="my-4 h-44 overflow-hidden rounded-2xl border border-line bg-canvas">
+              <svg class="play-stage demo-boss" viewBox="0 0 280 160" aria-hidden="true">
+                <g>
+                  <g>
+                    <path class="tube" d="M 28 142 H 96 Q 106 142 106 132 V 108"></path>
+                    <polygon class="chev" points="106,92 97,108 115,108"></polygon>
+                  </g>
+                  <g class="boss">
+                    <path class="tube" d="M 168 142 H 214 Q 224 142 224 132 V 108"></path>
+                    <polygon class="chev" points="224,92 215,108 233,108"></polygon>
+                  </g>
+                  <g class="you">
+                    <path class="tube" d="M 18 118 V 70 Q 18 60 28 60 H 100 Q 110 60 110 50 V 38 Q 110 28 120 28 H 198"></path>
+                    <polygon class="chev" points="214,28 198,20 198,36"></polygon>
+                  </g>
+                  <text class="pop pop-you" x="228" y="26">+5</text>
+                  <text class="pop pop-boss" x="236" y="96">+2</text>
+                  <g class="hand">
+                    <rect x="-6" y="0" width="12" height="26" rx="6"></rect>
+                    <rect x="-14" y="18" width="32" height="20" rx="10"></rect>
+                  </g>
+                </g>
+              </svg>
+            </div>
+            <h3 class="font-display text-2xl font-semibold">VS Boss</h3>
+            <p class="mt-2 leading-relaxed text-muted">Open it from home or from a collection. You take turns tapping a clear arrow. A longer arrow scores more points. Freeze, Fire, Eagle Eye, and Blinder are the powers for the match.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-anchor mx-auto max-w-[1200px] px-4 py-16 md:px-6 md:py-24" id="features">
+      <div class="max-w-2xl">
+        <p class="text-xs font-extrabold uppercase tracking-[0.16em] text-accent">Accounts</p>
+        <h2 class="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl">Google can restore it. Guest stays on the phone.</h2>
+        <p class="mt-4 text-lg leading-relaxed text-muted">Google keeps your progress and can restore it. Guest progress stays on the phone. In an online match, other players see your display name and avatar.</p>
+      </div>
+
+      <div class="mt-10 grid gap-5 md:grid-cols-12">
+        <article class="rounded-3xl border border-line bg-surface p-6 shadow-card md:col-span-4 md:p-8">
+          <div class="flex items-center justify-between gap-3">
+            <span class="rounded-full border border-line bg-raised px-3 py-1 text-xs font-extrabold text-accent">Google</span>
+          </div>
+          <h3 class="mt-5 font-display text-3xl font-semibold">Google keeps the save</h3>
+          <p class="mt-3 max-w-lg leading-relaxed text-muted">Sign in with Google and the game can restore that progress. The save includes your display name, avatar, coins, power-ups, chests, daily streak, spin dates, and cleared levels.</p>
+          <div class="mt-5 flex flex-wrap gap-2">
+            <span class="rounded-full bg-soft px-3 py-1 text-xs font-extrabold">Display name</span>
+            <span class="rounded-full bg-soft px-3 py-1 text-xs font-extrabold">Avatar</span>
+            <span class="rounded-full bg-soft px-3 py-1 text-xs font-extrabold">Coins</span>
+            <span class="rounded-full bg-soft px-3 py-1 text-xs font-extrabold">Power-ups</span>
+            <span class="rounded-full bg-soft px-3 py-1 text-xs font-extrabold">Chests</span>
+            <span class="rounded-full bg-soft px-3 py-1 text-xs font-extrabold">Cleared levels</span>
+            <span class="rounded-full bg-soft px-3 py-1 text-xs font-extrabold">Daily streak</span>
+            <span class="rounded-full bg-soft px-3 py-1 text-xs font-extrabold">Spin dates</span>
+          </div>
+        </article>
+
+        <article class="flex flex-col justify-between rounded-3xl border border-line bg-surface p-6 shadow-card md:col-span-4">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="rounded-full border border-line bg-raised px-3 py-1 text-xs font-extrabold text-gold">Guest</span>
+              <span class="material-symbols-outlined text-gold">smartphone</span>
+            </div>
+            <h3 class="mt-5 font-display text-3xl font-semibold">Guest stays on the phone</h3>
+            <p class="mt-3 leading-relaxed text-muted">Guest progress stays on that phone. Clearing the app’s storage starts a new guest session.</p>
+          </div>
+        </article>
+
+        <article class="rounded-3xl border border-line bg-surface p-6 shadow-card md:col-span-4">
+          <div class="flex items-center justify-between">
+            <span class="rounded-full border border-line bg-raised px-3 py-1 text-xs font-extrabold">Online</span>
+            <span class="material-symbols-outlined">badge</span>
+          </div>
+          <h3 class="mt-5 font-display text-3xl font-semibold">Name and avatar in a match</h3>
+          <p class="mt-3 leading-relaxed text-muted">Other players see the display name and avatar you chose while an online match is running.</p>
+          <div class="mt-5 flex gap-3">
+            <img class="h-16 w-16 rounded-2xl object-cover" src="assets/avatar-1.png" alt="Example player avatar">
+            <img class="h-16 w-16 rounded-2xl object-cover" src="assets/avatar-2.png" alt="">
+            <img class="h-16 w-16 rounded-2xl object-cover" src="assets/avatar-3.png" alt="">
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="section-anchor border-y border-line bg-canvas py-16 md:py-24" id="power-ups">
+      <div class="mx-auto max-w-[1200px] px-4 md:px-6">
+        <div class="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div class="max-w-2xl">
+            <p class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-gold">
+              <span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
+              Powers
+            </p>
+            <h2 class="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl">Powers and the store</h2>
+            <p class="mt-4 text-lg leading-relaxed text-muted">On a level you can use 1 Arrow, 3 Arrow, Eraser, and Eye. In VS Boss, same-phone play, and online 1v1 you can use Freeze, Fire, Eagle Eye, and Blinder. The store spends coins. An ad can add coins, hearts, or a doubled reward.</p>
+          </div>
+        </div>
+
+        <h3 class="mt-10 font-display text-2xl font-semibold">Level powers</h3>
+        <div class="mt-4 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <article class="rounded-3xl border border-line bg-surface p-5">
+            <div class="flex items-center justify-between border-b border-line pb-4">
+              <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-raised"><img class="asset" src="assets/power-arrow.png" alt=""></span>
+            </div>
+            <h4 class="mt-4 font-display text-2xl font-semibold">1 Arrow</h4>
+            <p class="mt-2 text-sm leading-relaxed text-muted">Clears one arrow that can currently escape.</p>
+          </article>
+          <article class="rounded-3xl border border-line bg-surface p-5">
+            <div class="flex items-center justify-between border-b border-line pb-4">
+              <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-raised"><img class="asset" src="assets/power-3arrow.png" alt=""></span>
+            </div>
+            <h4 class="mt-4 font-display text-2xl font-semibold">3 Arrow</h4>
+            <p class="mt-2 text-sm leading-relaxed text-muted">Clears up to three arrows that can currently escape.</p>
+          </article>
+          <article class="rounded-3xl border border-line bg-surface p-5">
+            <div class="flex items-center justify-between border-b border-line pb-4">
+              <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-raised"><img class="asset" src="assets/power-eraser.png" alt=""></span>
+            </div>
+            <h4 class="mt-4 font-display text-2xl font-semibold">Eraser</h4>
+            <p class="mt-2 text-sm leading-relaxed text-muted">Lets you choose an arrow and take it off the board.</p>
+          </article>
+          <article class="rounded-3xl border border-line bg-surface p-5">
+            <div class="flex items-center justify-between border-b border-line pb-4">
+              <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-raised"><img class="asset" src="assets/power-eye.png" alt=""></span>
+            </div>
+            <h4 class="mt-4 font-display text-2xl font-semibold">Eye</h4>
+            <p class="mt-2 text-sm leading-relaxed text-muted">Briefly highlights arrows whose lanes are clear right now.</p>
+          </article>
+        </div>
+
+        <h3 class="mt-10 font-display text-2xl font-semibold">Duel powers</h3>
+        <p class="mt-2 max-w-2xl text-sm text-muted">Used in VS Boss, same-phone play, and online 1v1.</p>
+        <div class="mt-4 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <article class="rounded-3xl border border-line bg-surface p-5">
+            <div class="flex items-center justify-between border-b border-line pb-4">
+              <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-raised"><img class="asset" src="assets/power-freeze.png" alt=""></span>
+            </div>
+            <h4 class="mt-4 font-display text-2xl font-semibold">Freeze</h4>
+            <p class="mt-2 text-sm leading-relaxed text-muted">Tap one arrow to freeze it, then play another.</p>
+          </article>
+          <article class="rounded-3xl border border-line bg-surface p-5">
+            <div class="flex items-center justify-between border-b border-line pb-4">
+              <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-raised"><img class="asset" src="assets/power-fire.png" alt=""></span>
+            </div>
+            <h4 class="mt-4 font-display text-2xl font-semibold">Fire</h4>
+            <p class="mt-2 text-sm leading-relaxed text-muted">Burn any arrow for its points, then continue the turn.</p>
+          </article>
+          <article class="rounded-3xl border border-line bg-surface p-5">
+            <div class="flex items-center justify-between border-b border-line pb-4">
+              <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-raised"><img class="asset" src="assets/power-eagle.png" alt=""></span>
+            </div>
+            <h4 class="mt-4 font-display text-2xl font-semibold">Eagle Eye</h4>
+            <p class="mt-2 text-sm leading-relaxed text-muted">Points you at a playable arrow and the points it is worth.</p>
+          </article>
+          <article class="rounded-3xl border border-line bg-surface p-5">
+            <div class="flex items-center justify-between border-b border-line pb-4">
+              <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-raised"><img class="asset" src="assets/power-blind.png" alt=""></span>
+            </div>
+            <h4 class="mt-4 font-display text-2xl font-semibold">Blinder</h4>
+            <p class="mt-2 text-sm leading-relaxed text-muted">The opponent’s powers go dark on their next turn.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-anchor border-y border-line bg-canvas py-16 md:py-24" id="modes">
+      <div class="mx-auto max-w-[1200px] px-4 md:px-6">
+        <div class="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+          <div class="max-w-xl">
+            <p class="text-xs font-extrabold uppercase tracking-[0.16em] text-accent">Modes</p>
+            <h2 class="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl">Collections, duels, dailies, and a challenge you make</h2>
+            <p class="mt-4 text-lg leading-relaxed text-muted">Play collection levels, open VS Boss from home or from a collection, pass one phone, or match online. Daily Map, Daily Reward, and Daily Spin each have their own place. Join Challenges is in beta.</p>
+          </div>
+          <div class="flex gap-1 overflow-x-auto rounded-2xl border border-line bg-raised p-1" id="mode-tabs" role="tablist" aria-label="Highlight a mode">
+            <button class="mode-tab shrink-0 rounded-xl bg-accent px-3 py-2 text-xs font-extrabold text-white" type="button" role="tab" aria-selected="true" data-index="0">Collections</button>
+            <button class="mode-tab shrink-0 rounded-xl px-3 py-2 text-xs font-extrabold text-muted" type="button" role="tab" aria-selected="false" data-index="1">VS Boss</button>
+            <button class="mode-tab shrink-0 rounded-xl px-3 py-2 text-xs font-extrabold text-muted" type="button" role="tab" aria-selected="false" data-index="2">Same phone</button>
+            <button class="mode-tab shrink-0 rounded-xl px-3 py-2 text-xs font-extrabold text-muted" type="button" role="tab" aria-selected="false" data-index="3">Online</button>
+            <button class="mode-tab shrink-0 rounded-xl px-3 py-2 text-xs font-extrabold text-muted" type="button" role="tab" aria-selected="false" data-index="4">Daily Map</button>
+            <button class="mode-tab shrink-0 rounded-xl px-3 py-2 text-xs font-extrabold text-muted" type="button" role="tab" aria-selected="false" data-index="5">Reward</button>
+            <button class="mode-tab shrink-0 rounded-xl px-3 py-2 text-xs font-extrabold text-muted" type="button" role="tab" aria-selected="false" data-index="6">Spin</button>
+            <button class="mode-tab shrink-0 rounded-xl px-3 py-2 text-xs font-extrabold text-muted" type="button" role="tab" aria-selected="false" data-index="7">Create</button>
+            <button class="mode-tab shrink-0 rounded-xl px-3 py-2 text-xs font-extrabold text-muted" type="button" role="tab" aria-selected="false" data-index="8">Beta</button>
+          </div>
+        </div>
+
+        <div class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4" id="modes-grid">
+          <article class="mode-card is-active flex flex-col justify-between rounded-3xl border border-accent bg-surface p-5 transition-transform" data-mode-id="0">
+            <div>
+              <div class="mb-4 flex items-center justify-between border-b border-line pb-3">
+                <span class="font-mono text-xs font-extrabold text-accent">LEVELS</span>
+                <span class="material-symbols-outlined flex h-10 w-10 items-center justify-center"><img class="h-10 w-10 object-contain" src="assets/banner-farm.jpg" alt=""></span>
+              </div>
+              <h3 class="font-display text-2xl font-semibold">Collections</h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">Normal levels live in the collections. The time bonus applies here: 2, 6, or 10 minutes for 50% extra coins.</p>
+            </div>
+            <div class="mt-4 grid grid-cols-3 gap-2">
+              <img class="h-16 w-full rounded-xl object-cover" src="assets/banner-farm.jpg" alt="Farm Kingdom collection">
+              <img class="h-16 w-full rounded-xl object-cover" src="assets/banner-birds.jpg" alt="Bird Kingdom collection">
+              <img class="h-16 w-full rounded-xl object-cover" src="assets/banner-india.jpg" alt="India collection">
+            </div>
+            <div class="mt-5 flex items-center justify-between border-t border-line pt-4">
+              <span class="text-sm font-bold">Normal levels</span>
+              <span class="rounded-full bg-raised px-2 py-1 font-mono text-[11px] text-accent">Time bonus</span>
+            </div>
+          </article>
+
+          <article class="mode-card flex flex-col justify-between rounded-3xl border border-line bg-surface p-5 transition-transform" data-mode-id="1">
+            <div>
+              <div class="mb-4 flex items-center justify-between border-b border-line pb-3">
+                <span class="font-mono text-xs font-extrabold text-gold">BOSS</span>
+                <span class="material-symbols-outlined flex h-10 w-10 items-center justify-center"><img class="h-10 w-10 object-contain" src="assets/mode-boss.png" alt=""></span>
+              </div>
+              <h3 class="font-display text-2xl font-semibold">VS Boss</h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">You and the boss take turns on one board. Tap a clear arrow. A longer arrow scores more. Freeze, Fire, Eagle Eye, and Blinder are the duel powers.</p>
+            </div>
+            <div class="mt-5 flex items-center justify-between border-t border-line pt-4">
+              <span class="text-sm font-bold">Home or collection</span>
+              <span class="rounded-full bg-raised px-2 py-1 font-mono text-[11px] text-gold">Turns</span>
+            </div>
+          </article>
+
+          <article class="mode-card flex flex-col justify-between rounded-3xl border border-line bg-surface p-5 transition-transform" data-mode-id="2">
+            <div>
+              <div class="mb-4 flex items-center justify-between border-b border-line pb-3">
+                <span class="font-mono text-xs font-extrabold text-pink">LOCAL</span>
+                <span class="material-symbols-outlined flex h-10 w-10 items-center justify-center"><img class="h-10 w-10 object-contain" src="assets/mode-local.png" alt=""></span>
+              </div>
+              <h3 class="font-display text-2xl font-semibold">Same-phone play</h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">Two players share one phone or tablet and take turns on the same board.</p>
+            </div>
+            <div class="mt-5 flex items-center justify-between border-t border-line pt-4">
+              <span class="text-sm font-bold">Pass the phone</span>
+              <span class="rounded-full bg-raised px-2 py-1 font-mono text-[11px] text-pink">2 players</span>
+            </div>
+          </article>
+
+          <article class="mode-card flex flex-col justify-between rounded-3xl border border-line bg-surface p-5 transition-transform" data-mode-id="3">
+            <div>
+              <div class="mb-4 flex items-center justify-between border-b border-line pb-3">
+                <span class="font-mono text-xs font-extrabold text-blue">ONLINE</span>
+                <span class="material-symbols-outlined flex h-10 w-10 items-center justify-center"><img class="h-10 w-10 object-contain" src="assets/mode-online.png" alt=""></span>
+              </div>
+              <h3 class="font-display text-2xl font-semibold">Online 1v1</h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">A network match. The other player sees your display name and avatar.</p>
+            </div>
+            <div class="mt-5 flex items-center justify-between border-t border-line pt-4">
+              <span class="text-sm font-bold">Needs internet</span>
+              <span class="rounded-full bg-raised px-2 py-1 font-mono text-[11px] text-blue">1v1</span>
+            </div>
+          </article>
+
+          <article class="mode-card flex flex-col justify-between rounded-3xl border border-line bg-surface p-5 transition-transform" data-mode-id="4">
+            <div>
+              <div class="mb-4 flex items-center justify-between border-b border-line pb-3">
+                <span class="font-mono text-xs font-extrabold text-cyan">DAILY</span>
+                <span class="material-symbols-outlined flex h-10 w-10 items-center justify-center"><img class="h-10 w-10 object-contain" src="assets/banner-wonders.jpg" alt=""></span>
+              </div>
+              <h3 class="font-display text-2xl font-semibold">Daily Map</h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">A new board each day, with its own map.</p>
+            </div>
+            <div class="mt-5 flex items-center justify-between border-t border-line pt-4">
+              <span class="text-sm font-bold">One daily board</span>
+              <span class="rounded-full bg-raised px-2 py-1 font-mono text-[11px] text-cyan">Map</span>
+            </div>
+          </article>
+
+          <article class="mode-card flex flex-col justify-between rounded-3xl border border-line bg-surface p-5 transition-transform" data-mode-id="5">
+            <div>
+              <div class="mb-4 flex items-center justify-between border-b border-line pb-3">
+                <span class="font-mono text-xs font-extrabold text-gold">REWARD</span>
+                <span class="material-symbols-outlined flex h-10 w-10 items-center justify-center"><img class="h-10 w-10 object-contain" src="assets/mode-reward.png" alt=""></span>
+              </div>
+              <h3 class="font-display text-2xl font-semibold">Daily Reward</h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">Come back each day and collect the reward on the path.</p>
+            </div>
+            <div class="mt-5 flex items-center justify-between border-t border-line pt-4">
+              <span class="text-sm font-bold">Daily</span>
+              <span class="rounded-full bg-raised px-2 py-1 font-mono text-[11px] text-gold">Reward</span>
+            </div>
+          </article>
+          <article class="mode-card flex flex-col justify-between rounded-3xl border border-line bg-surface p-5 transition-transform" data-mode-id="6">
+            <div>
+              <div class="mb-4 flex items-center justify-between border-b border-line pb-3">
+                <span class="font-mono text-xs font-extrabold text-cyan">SPIN</span>
+                <span class="material-symbols-outlined flex h-10 w-10 items-center justify-center"><img class="h-10 w-10 object-contain" src="assets/mode-spin.png" alt=""></span>
+              </div>
+              <h3 class="font-display text-2xl font-semibold">Daily Spin</h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">Spin once a day for a reward.</p>
+            </div>
+            <div class="mt-5 flex items-center justify-between border-t border-line pt-4">
+              <span class="text-sm font-bold">Daily</span>
+              <span class="rounded-full bg-raised px-2 py-1 font-mono text-[11px] text-cyan">Spin</span>
+            </div>
+          </article>
+          <article class="mode-card flex flex-col justify-between rounded-3xl border border-line bg-surface p-5 transition-transform" data-mode-id="7">
+            <div>
+              <div class="mb-4 flex items-center justify-between border-b border-line pb-3">
+                <span class="font-mono text-xs font-extrabold text-mint">CREATE</span>
+                <span class="material-symbols-outlined flex h-10 w-10 items-center justify-center"><img class="h-10 w-10 object-contain" src="assets/mode-challenge.png" alt=""></span>
+              </div>
+              <h3 class="font-display text-2xl font-semibold">Create Challenge</h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">Pick a photo or paint a shape. The picture becomes a puzzle on the device.</p>
+            </div>
+            <div class="mt-5 flex items-center justify-between border-t border-line pt-4">
+              <span class="text-sm font-bold">On the device</span>
+              <span class="rounded-full bg-raised px-2 py-1 font-mono text-[11px] text-mint">Your image</span>
+            </div>
+          </article>
+
+          <article class="mode-card flex flex-col justify-between rounded-3xl border border-line bg-surface p-5 transition-transform" data-mode-id="8">
+            <div>
+              <div class="mb-4 flex items-center justify-between border-b border-line pb-3">
+                <span class="font-mono text-xs font-extrabold text-coral">BETA</span>
+                <span class="material-symbols-outlined flex h-10 w-10 items-center justify-center"><img class="h-10 w-10 object-contain" src="assets/mode-challenge.png" alt=""></span>
+              </div>
+              <h3 class="font-display text-2xl font-semibold">Join Challenges</h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">Join a challenge someone else made. This part of the game is in beta.</p>
+            </div>
+            <div class="mt-5 flex items-center justify-between border-t border-line pt-4">
+              <span class="text-sm font-bold">Beta</span>
+              <span class="rounded-full bg-raised px-2 py-1 font-mono text-[11px] text-coral">BETA</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-anchor mx-auto max-w-[1200px] px-4 py-16 md:px-6 md:py-24" id="about">
+      <div class="rounded-[28px] border border-line bg-surface p-6 md:p-8">
+        <div class="grid gap-8 lg:grid-cols-12">
+          <div class="border-b border-line pb-8 lg:col-span-4 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-8">
+            <span class="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-raised"><img class="asset" src="assets/power-arrow.png" alt=""></span>
+            <p class="mt-5 font-mono text-xs font-extrabold uppercase tracking-[0.14em] text-accent">Support</p>
+            <h2 class="mt-2 font-display text-3xl font-semibold">TS Gaming</h2>
+            <p class="mt-3 text-sm leading-relaxed text-muted">Publisher name used with Winding Arrows. Write to tsgamings2dio@gmail.com for bugs, online matches, account deletion, and privacy.</p>
+            <p class="mt-4 text-sm font-bold"><a class="text-accent hover:text-accent-hover" href="mailto:tsgamings2dio@gmail.com">tsgamings2dio@gmail.com</a></p>
+            <p class="mt-3 inline-flex items-center gap-2 text-sm font-bold"><span class="h-2 w-2 rounded-full bg-mint"></span>Android and iOS</p>
+          </div>
+          <div class="lg:col-span-8 lg:pl-4">
+            <div class="flex items-center justify-between gap-3">
+              <p class="font-mono text-[11px] font-extrabold uppercase tracking-[0.14em] text-muted">What we can help with</p>
+              <p class="text-sm font-extrabold text-accent">Email support</p>
+            </div>
+            <p class="mt-4 font-display text-2xl leading-snug md:text-3xl">Bugs, online matches, account deletion, and privacy.</p>
+            <div class="mt-6 grid gap-3 sm:grid-cols-3">
+              <div class="rounded-2xl border border-line bg-raised p-4">
+                <p class="font-extrabold">Bugs</p>
+                <p class="mt-1 text-sm text-muted">A level that will not generate, a crash, or a power that does not fire.</p>
+              </div>
+              <div class="rounded-2xl border border-line bg-raised p-4">
+                <p class="font-extrabold">Online matches</p>
+                <p class="mt-1 text-sm text-muted">Matchmaking, a stuck match, or a display name.</p>
+              </div>
+              <div class="rounded-2xl border border-line bg-raised p-4">
+                <p class="font-extrabold">Deletion and privacy</p>
+                <p class="mt-1 text-sm text-muted">Use Delete account, or email with the subject “Winding Arrows privacy”.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-anchor border-t border-line bg-canvas py-16 md:py-24" id="faq">
+      <div class="mx-auto max-w-[800px] px-4 md:px-6">
+        <p class="text-xs font-extrabold uppercase tracking-[0.16em] text-accent">FAQ</p>
+        <h2 class="mt-3 font-display text-4xl font-bold tracking-tight">Straight answers</h2>
+        <div class="mt-8 divide-y divide-line rounded-3xl border border-line bg-surface">
+          <details class="group p-5" open>
+            <summary class="flex cursor-pointer items-center justify-between gap-4 font-extrabold">
+              Can I play offline?
+              <span class="material-symbols-outlined text-muted group-open:rotate-45">add</span>
+            </summary>
+            <p class="mt-3 leading-relaxed text-muted">Collection levels and a Guest save stay on the phone. Online 1v1 and a Google restore use a connection.</p>
+          </details>
+          <details class="group p-5">
+            <summary class="flex cursor-pointer items-center justify-between gap-4 font-extrabold">
+              What do ads give?
+              <span class="material-symbols-outlined text-muted group-open:rotate-45">add</span>
+            </summary>
+            <p class="mt-3 leading-relaxed text-muted">Ads can give extra coins, hearts, or a doubled reward. The store spends coins.</p>
+          </details>
+          <details class="group p-5">
+            <summary class="flex cursor-pointer items-center justify-between gap-4 font-extrabold">
+              What is the time bonus?
+              <span class="material-symbols-outlined text-muted group-open:rotate-45">add</span>
+            </summary>
+            <p class="mt-3 leading-relaxed text-muted">Finish in time for 50% extra coins. Easy is 2 minutes, Medium is 6, and Hard is 10.</p>
+          </details>
+          <details class="group p-5">
+            <summary class="flex cursor-pointer items-center justify-between gap-4 font-extrabold">
+              What does Google restore?
+              <span class="material-symbols-outlined text-muted group-open:rotate-45">add</span>
+            </summary>
+            <p class="mt-3 leading-relaxed text-muted">A Google sign-in can restore the save: display name, avatar, coins, power-ups, chests, daily streak, spin dates, and cleared levels. Guest progress stays on that phone and is not restored as a Google save.</p>
+          </details>
+          <details class="group p-5">
+            <summary class="flex cursor-pointer items-center justify-between gap-4 font-extrabold">
+              Is this game for children under 13?
+              <span class="material-symbols-outlined text-muted group-open:rotate-45">add</span>
+            </summary>
+            <p class="mt-3 leading-relaxed text-muted">No. Winding Arrows is made for a general audience. It is not directed at children under 13.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="relative mx-auto max-w-[1200px] px-4 py-16 md:px-6 md:py-24" id="start">
+      <div class="relative overflow-hidden rounded-[32px] border border-line bg-surface px-6 py-14 text-center shadow-card md:px-12">
+        <p class="inline-flex items-center gap-2 rounded-full border border-line bg-raised px-3 py-1 text-xs font-extrabold text-accent">
+          <span class="material-symbols-outlined text-[16px]">all_inclusive</span>
+          Tap a clear arrow.
+        </p>
+        <h2 class="mx-auto mt-5 max-w-2xl font-display text-4xl font-bold tracking-tight md:text-6xl">Play it on your phone.</h2>
+        <p class="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-muted">The preview on this page is the interactive ad. The full game is the Android and iOS app. Store links are not published yet.</p>
+        <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <span class="store-pending">Google Play · link not published</span>
+          <span class="store-pending">App Store · link not published</span>
+        </div>
+        <p class="mt-8 text-sm text-muted">These buttons turn into store links when the listings exist.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-line bg-canvas" id="contact">
+    <div class="mx-auto max-w-[1200px] px-4 py-14 md:px-6">
+      <div class="grid gap-10 border-b border-line pb-10 md:grid-cols-2 lg:grid-cols-5">
+        <div class="lg:col-span-2">
+          <div class="flex items-center gap-2.5">
+            <span class="flex h-10 w-10 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10 text-accent">
+              <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 19c3-1 6-4 6-8V5"></path>
+                <path d="M14 5v6c0 4 3 7 6 8"></path>
+                <path d="M7 8l3-3 3 3"></path>
+                <circle cx="20" cy="19" r="1.5" fill="currentColor"></circle>
+              </svg>
+            </span>
+            <span class="font-display text-xl font-bold">Winding Arrows</span>
+          </div>
+          <p class="mt-4 max-w-sm leading-relaxed text-muted">Tap a clear arrow and clear the board. TS Gaming · tsgamings2dio@gmail.com</p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <span class="store-pending">Google Play · link not published</span>
+            <span class="store-pending">App Store · link not published</span>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <p class="text-sm font-extrabold uppercase tracking-wider">Game</p>
+          <a class="text-muted hover:text-ink" href="#mechanics">How to Play</a>
+          <a class="text-muted hover:text-ink" href="#features">Accounts</a>
+          <a class="text-muted hover:text-ink" href="#power-ups">Powers</a>
+          <a class="text-muted hover:text-ink" href="#modes">Modes</a>
+        </div>
+        <div class="flex flex-col gap-2">
+          <p class="text-sm font-extrabold uppercase tracking-wider">Help</p>
+          <a class="text-muted hover:text-ink" href="#faq">FAQ</a>
+          <a class="text-muted hover:text-ink" href="#about">Contact</a>
+          <a class="text-muted hover:text-ink" href="mailto:tsgamings2dio@gmail.com">tsgamings2dio@gmail.com</a>
+        </div>
+        <div class="flex flex-col gap-2" id="legal">
+          <p class="text-sm font-extrabold uppercase tracking-wider">Legal</p>
+          <a class="text-muted hover:text-ink" href="/privacy">Privacy</a>
+          <a class="text-muted hover:text-ink" href="/delete-account">Delete account</a>
+          <a class="text-muted hover:text-ink" href="#about">Contact</a>
+        </div>
+      </div>
+      <div class="flex flex-col items-start justify-between gap-3 pt-6 text-sm text-muted sm:flex-row sm:items-center">
+        <p>© 2026 Winding Arrows · TS Gaming</p>
+        <p id="support"><a class="hover:text-ink" href="mailto:tsgamings2dio@gmail.com">tsgamings2dio@gmail.com</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <dialog class="w-[min(960px,calc(100%-2rem))] rounded-3xl border border-line bg-canvas p-3 text-ink backdrop:bg-black/70" id="trailer-dialog">
+    <div class="mb-2 flex items-center justify-between px-2">
+      <p class="font-display text-lg font-semibold">Gameplay trailer</p>
+      <button class="flex h-11 w-11 items-center justify-center rounded-full bg-raised" id="close-trailer" type="button" aria-label="Close trailer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <video class="aspect-video w-full rounded-2xl bg-black" id="trailer-video" controls playsinline preload="none">
+      <source src="/media/winding-arrows.mp4" type="video/mp4">
+    </video>
+  </dialog>
+
+  <script>
+    const root = document.documentElement;
+    const themeToggle = document.getElementById("theme-toggle");
+    const themeIcon = document.getElementById("theme-icon");
+
+    function applyTheme(theme) {
+      root.classList.toggle("dark", theme === "dark");
+      root.classList.toggle("light", theme === "light");
+      const toLight = theme === "dark";
+      themeToggle.setAttribute("aria-label", toLight ? "Switch to light theme" : "Switch to dark theme");
+      themeIcon.textContent = toLight ? "light_mode" : "dark_mode";
+      localStorage.setItem("winding-arrow-theme", theme);
+    }
+
+    applyTheme(localStorage.getItem("winding-arrow-theme") || "dark");
+    themeToggle.addEventListener("click", () => {
+      applyTheme(root.classList.contains("dark") ? "light" : "dark");
+    });
+
+    const menu = document.getElementById("mobile-menu");
+    const menuToggle = document.getElementById("menu-toggle");
+    const menuIcon = document.getElementById("menu-icon");
+    menuToggle.addEventListener("click", () => {
+      const open = menu.dataset.open !== "true";
+      menu.dataset.open = String(open);
+      menuToggle.setAttribute("aria-expanded", String(open));
+      menuIcon.textContent = open ? "close" : "menu";
+    });
+    document.querySelectorAll(".mobile-link").forEach((link) => {
+      link.addEventListener("click", () => {
+        menu.dataset.open = "false";
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuIcon.textContent = "menu";
+      });
+    });
+
+    const bgVideo = document.getElementById("bg-video");
+    const bgToggle = document.getElementById("bg-toggle");
+    const bgIcon = document.getElementById("bg-toggle-icon");
+    const bgLabel = document.getElementById("bg-toggle-label");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function setBackgroundPlaying(playing) {
+      if (playing) {
+        bgVideo.play().catch(() => {});
+      } else {
+        bgVideo.pause();
+      }
+      bgIcon.textContent = playing ? "pause" : "play_arrow";
+      bgLabel.textContent = playing ? "Pause background" : "Play background";
+    }
+
+    if (reduceMotion) {
+      setBackgroundPlaying(false);
+    }
+
+    bgToggle.addEventListener("click", () => {
+      setBackgroundPlaying(bgVideo.paused);
+    });
+
+    const trailerDialog = document.getElementById("trailer-dialog");
+    const trailerVideo = document.getElementById("trailer-video");
+    document.getElementById("open-video-preview").addEventListener("click", () => {
+      trailerDialog.showModal();
+      trailerVideo.currentTime = 0;
+      trailerVideo.play().catch(() => {});
+    });
+    document.getElementById("close-trailer").addEventListener("click", () => trailerDialog.close());
+    trailerDialog.addEventListener("close", () => trailerVideo.pause());
+    trailerDialog.addEventListener("click", (event) => {
+      if (event.target === trailerDialog) trailerDialog.close();
+    });
+
+    const previewFrame = document.getElementById("preview-frame");
+    const previewGate = document.getElementById("preview-gate");
+    const previewBar = document.getElementById("preview-bar");
+    previewGate.addEventListener("click", () => {
+      previewFrame.classList.remove("pointer-events-none");
+      previewFrame.classList.add("pointer-events-auto");
+      previewGate.classList.add("hidden");
+      previewBar.hidden = false;
+    });
+    document.getElementById("preview-release").addEventListener("click", () => {
+      previewFrame.classList.add("pointer-events-none");
+      previewFrame.classList.remove("pointer-events-auto");
+      previewGate.classList.remove("hidden");
+      previewBar.hidden = true;
+    });
+
+    const tabs = document.querySelectorAll(".mode-tab");
+    const cards = document.querySelectorAll(".mode-card");
+    function showMode(index) {
+      tabs.forEach((tab, i) => {
+        const active = i === index;
+        tab.setAttribute("aria-selected", String(active));
+        tab.className = active
+          ? "mode-tab shrink-0 rounded-xl bg-accent px-3 py-2 text-xs font-extrabold text-white"
+          : "mode-tab shrink-0 rounded-xl px-3 py-2 text-xs font-extrabold text-muted";
+      });
+      cards.forEach((card, i) => {
+        card.classList.toggle("is-active", i === index);
+        card.classList.toggle("border-accent", i === index);
+        card.classList.toggle("border-line", i !== index);
+      });
+      cards[index]?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest", inline: "nearest" });
+    }
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => showMode(Number(tab.dataset.index)));
+    });
+  </script>
+  <!-- Motion layer: game-agnostic runtime + page-specific bindings -->
+  <script src="motion.config.js"></script>
+  <script src="motion.js"></script>
+</body>
+</html>

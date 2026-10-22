@@ -1,0 +1,375 @@
+/* ==========================================================================
+   MOTION SYSTEM — game-agnostic
+   --------------------------------------------------------------------------
+   This file knows nothing about any particular game or page. It only reacts
+   to data attributes that motion.js applies from motion.config.js:
+
+   data-m="rise|left|right|scale|panel|slide|device|chip|fade|words|trigger|header"
+   data-m-card         card with a 0..1 progress value (--cp)
+   data-m-from         direction a card travels from (left|right|up)
+   data-m-surface      section surface that wipes open / closes on scroll
+   data-m-vis="draw|sequence"   animated visual window
+   data-m-icon         small icon stage inside a card
+   data-m-parallax     depth drift on scroll
+
+   Everything hidden by motion is hidden by an attribute that only exists once
+   JavaScript has bound it, so without JS the page is simply fully visible.
+   ========================================================================== */
+
+@property --cp { syntax: "<number>"; inherits: true; initial-value: 0; }
+@property --dp { syntax: "<number>"; inherits: true; initial-value: 0; }
+@property --gx { syntax: "<percentage>"; inherits: false; initial-value: 74%; }
+@property --gy { syntax: "<percentage>"; inherits: false; initial-value: 22%; }
+
+:root {
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --ease-io: cubic-bezier(.65, 0, .35, 1);
+}
+
+main { overflow-x: clip; }
+
+:focus-visible {
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: 3px;
+}
+[data-m-card]:focus-within { border-color: rgb(var(--accent) / .6); }
+
+/* --------------------------------------------------------------------------
+   1. Directional reveal primitives
+   -------------------------------------------------------------------------- */
+[data-m] {
+  --d: calc(var(--base, 0ms) + var(--i, 0) * var(--stagger, 80ms));
+  opacity: 0;
+}
+[data-m][data-m] {
+  transition:
+    opacity .9s var(--ease) var(--d),
+    translate 1s var(--ease) var(--d),
+    scale 1s var(--ease) var(--d),
+    rotate 1s var(--ease) var(--d),
+    clip-path 1.2s var(--ease) var(--d),
+    color .25s, background-color .25s, border-color .25s;
+}
+[data-m="rise"]   { translate: 0 30px; }
+[data-m="drop"]   { translate: 0 -14px; }
+[data-m="left"]   { translate: -56px 0; }
+[data-m="right"]  { translate: 56px 0; }
+[data-m="scale"]  { scale: .9; translate: 0 18px; }
+[data-m="panel"]  { translate: 0 44px; scale: .975; }
+[data-m="slide"]  { translate: 64px 0; rotate: 2deg; }
+[data-m="chip"]   { scale: .5; translate: 0 10px; }
+[data-m="header"] { translate: 0 -100%; }
+[data-m="device"] {
+  translate: 70px 0;
+  rotate: 4deg;
+  clip-path: inset(0 0 0 100% round 36px);
+}
+[data-m="words"], [data-m="trigger"], [data-m="header"] { opacity: 1; }
+
+[data-m].is-in { opacity: 1; translate: 0 0; scale: 1; rotate: 0deg; }
+[data-m="device"].is-in { clip-path: inset(0 0 0 0 round 36px); }
+[data-m].is-done { --d: 0ms; }
+
+/* Reverse (scrolling back): quick and undelayed so the entrance visibly plays backwards */
+[data-m][data-m].m-rev {
+  --d: 0ms;
+  transition:
+    opacity .45s var(--ease),
+    translate .6s var(--ease),
+    scale .6s var(--ease),
+    rotate .6s var(--ease),
+    clip-path .6s var(--ease),
+    color .25s, background-color .25s, border-color .25s;
+}
+[data-m="words"].m-rev .m-wi {
+  transition: translate .5s var(--ease), rotate .5s var(--ease);
+}
+[data-m="device"].is-done { clip-path: none; }
+
+/* Headline word masks */
+.m-w { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .14em; margin-bottom: -.14em; }
+.m-wi { display: inline-block; translate: 0 118%; rotate: 5deg; transform-origin: 0 100%; }
+[data-m="words"] .m-wi {
+  transition: translate 1.05s var(--ease) calc(var(--base, 0ms) + var(--w, 0) * 55ms),
+              rotate 1.05s var(--ease) calc(var(--base, 0ms) + var(--w, 0) * 55ms);
+}
+[data-m="words"].is-in .m-wi { translate: 0 0; rotate: 0deg; }
+
+/* --------------------------------------------------------------------------
+   2. Cards — one progress value (--cp) drives everything inside
+   -------------------------------------------------------------------------- */
+[data-m-card] {
+  position: relative;
+  isolation: isolate;
+  --dx: 0px;
+  --dy: 0px;
+  --vw: clamp(0, calc((var(--cp) - .3) / .5), 1);
+  opacity: clamp(0, calc(var(--cp) * 3), 1);
+  translate: calc(var(--dx) * (1 - var(--cp))) calc(var(--dy) * (1 - var(--cp)));
+  scale: calc(.94 + .06 * var(--cp));
+}
+[data-m-from="left"]  { --dx: -72px; }
+[data-m-from="right"] { --dx: 72px; }
+[data-m-from="up"]    { --dy: 44px; }
+.m-scrub[data-m-from="right"] { --dx: min(46vw, 620px); }
+.m-scrub[data-m-from="left"]  { --dx: max(-46vw, -620px); }
+@media (max-width: 1023px) {
+  .m-scrub[data-m-from="right"] { --dx: 28vw; }
+  .m-scrub[data-m-from="left"]  { --dx: -28vw; }
+}
+
+[data-m-card][data-m-card] {
+  transition: --cp 1.25s var(--ease) var(--delay, 0ms),
+              transform .35s var(--ease), border-color .3s, box-shadow .4s;
+}
+.m-scrub[data-m-card] {
+  transition: --cp .1s linear, transform .35s var(--ease), border-color .3s, box-shadow .4s;
+}
+
+[data-m-card][data-m-card].m-out {
+  transition: --cp .6s var(--ease) var(--delay, 0ms),
+              transform .35s var(--ease), border-color .3s, box-shadow .4s;
+}
+
+/* Everything inside a card settles in sequence: top visual first, text last */
+[data-m-card] > * {
+  --kp: clamp(0, calc((var(--cp) - .22 - var(--k, 0) * .1) / .4), 1);
+  opacity: var(--kp);
+  translate: 0 calc((1 - var(--kp)) * 16px);
+}
+
+/* Pointer light + lift (fine pointers only) */
+[data-m-card]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0;
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%), rgb(var(--accent) / .16), transparent 62%);
+  transition: opacity .4s;
+}
+@media (hover: hover) and (pointer: fine) {
+  [data-m-card]:hover::before { opacity: 1; }
+  [data-m-card]:hover {
+    transform: translateY(-4px);
+    border-color: rgb(var(--accent) / .5);
+    box-shadow: 0 18px 44px rgb(0 0 0 / .22);
+  }
+  [data-m-card]:hover [data-m-icon] { translate: 0 -3px; filter: drop-shadow(0 6px 10px rgb(var(--accent) / .35)); }
+}
+
+/* Icon stage: assembles with its card */
+[data-m-icon] {
+  scale: calc(.45 + .55 * var(--kp, 1));
+  rotate: calc((1 - var(--kp, 1)) * -24deg);
+  transition: translate .4s var(--ease), filter .4s;
+}
+
+/* --------------------------------------------------------------------------
+   3. Visual windows (independent mini-stages)
+   -------------------------------------------------------------------------- */
+.m-window[data-m-vis="draw"] {
+  --dp: var(--vw, 1);
+  clip-path: inset(0 0 0 calc((1 - var(--vw, 1)) * 100%) round 16px);
+}
+.m-window[data-m-vis="draw"] > div:first-child > span:first-child { translate: calc((1 - var(--vw, 1)) * -18px) 0; opacity: var(--vw, 1); }
+.m-window[data-m-vis="draw"] > div:first-child > span:last-child  { translate: calc((1 - var(--vw, 1)) * 18px) 0;  opacity: var(--vw, 1); }
+.m-window[data-m-vis="draw"] > p { opacity: clamp(0, calc((var(--vw, 1) - .6) * 2.5), 1); }
+
+.m-window[data-m-vis="sequence"][data-m] {
+  --dp: 0;
+  transition: --dp 2.4s var(--ease-io) var(--base, 200ms), opacity .6s;
+}
+.m-window[data-m-vis="sequence"].is-in { --dp: 1; }
+.m-window[data-m-vis="sequence"][data-m].m-rev { transition: --dp .7s var(--ease-io), opacity .4s; }
+
+/* Stroke drawing shared by both variants */
+.m-draw {
+  --sp: clamp(0, calc(var(--dp, 0) * var(--n, 1) - var(--pi, 0)), 1);
+  stroke-dasharray: var(--len, 400) var(--len, 400);
+  stroke-dashoffset: calc(var(--len, 400) * (1 - var(--sp)));
+  opacity: clamp(0, calc(var(--sp) * 40), 1);
+}
+.m-head {
+  --sp: clamp(0, calc(var(--dp, 0) * var(--n, 1) - var(--pi, 0)), 1);
+  --hp: clamp(0, calc((var(--sp) - .8) * 5), 1);
+  opacity: var(--hp);
+  scale: calc(.4 + .6 * var(--hp));
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .m-window svg { translate: calc(var(--nx, 0) * 8px) calc(var(--ny, 0) * 5px); transition: translate .5s var(--ease); }
+}
+
+.m-stat { font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------------------
+   4. Section surfaces: wipe open on enter, ease away on leave
+   -------------------------------------------------------------------------- */
+[data-m-surface] {
+  position: relative;
+  clip-path: inset(0 calc(var(--inset, 0) * min(6vw, 72px)) round calc(var(--inset, 0) * 36px));
+}
+[data-m-surface]::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgb(var(--accent)), transparent);
+  transform-origin: 0 50%;
+  transform: scaleX(calc(1 - var(--inset, 0)));
+  opacity: clamp(0, calc(var(--inset, 0) * 3), 1);
+}
+[data-m-surface] > * {
+  translate: 0 calc(var(--leave, 0) * -28px);
+  opacity: calc(1 - var(--leave, 0) * .45);
+}
+
+/* Moving aura behind the page: the background drifts between sections */
+#m-aura {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background: radial-gradient(720px 460px at var(--gx) var(--gy), rgb(var(--accent) / .16), transparent 66%);
+  transition: --gx 1.8s var(--ease), --gy 1.8s var(--ease);
+}
+
+/* Depth drift */
+[data-m-parallax] { transform: translate3d(0, var(--py, 0px), 0); }
+
+/* Slow rotating glow in a featured panel */
+[data-m-aura] { isolation: isolate; }
+[data-m-aura]::before {
+  content: "";
+  position: absolute;
+  inset: -45%;
+  z-index: -1;
+  pointer-events: none;
+  background: conic-gradient(from 0deg, transparent 0 55%, rgb(var(--accent) / .2) 75%, transparent 95%);
+  animation: m-spin 22s linear infinite;
+}
+
+/* --------------------------------------------------------------------------
+   5. Navigation, header, buttons
+   -------------------------------------------------------------------------- */
+header.fixed {
+  transition: background-color .4s, box-shadow .4s, border-color .4s;
+}
+header.fixed.is-scrolled {
+  background-color: rgb(var(--canvas) / .94);
+  box-shadow: 0 10px 34px rgb(0 0 0 / .2);
+}
+.m-nav-ind {
+  position: absolute;
+  left: 0; bottom: -8px;
+  width: 1px; height: 2px;
+  border-radius: 2px;
+  background: rgb(var(--accent));
+  transform-origin: 0 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .55s var(--ease), opacity .3s;
+}
+
+.m-menu {
+  position: absolute;
+  left: 0; right: 0; top: 100%;
+  visibility: hidden;
+  opacity: 0;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path .5s var(--ease), opacity .3s, visibility 0s linear .5s;
+}
+.m-menu[data-open="true"] {
+  visibility: visible;
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
+  transition-delay: 0s;
+}
+.m-menu a {
+  opacity: 0;
+  translate: 0 -10px;
+  transition: opacity .35s, translate .5s var(--ease), background-color .2s;
+}
+.m-menu[data-open="true"] a {
+  opacity: 1;
+  translate: 0 0;
+  transition-delay: calc(80ms + var(--i, 0) * 45ms), calc(80ms + var(--i, 0) * 45ms), 0s;
+}
+
+.m-btn.m-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    background-color .25s, border-color .25s, color .25s,
+    box-shadow .35s var(--ease),
+    translate .35s var(--ease), scale .2s var(--ease), opacity .9s var(--ease) var(--d, 0ms);
+}
+.m-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / .26) 50%, transparent 65%);
+  translate: -120% 0;
+  transition: translate .8s var(--ease);
+}
+.m-btn .material-symbols-outlined { transition: translate .35s var(--ease); }
+@media (hover: hover) {
+  .m-btn:hover { translate: 0 -2px; }
+  .m-btn:hover::after { translate: 120% 0; }
+  .m-btn:hover .m-arrow { translate: 5px 0; }
+  .m-btn-icon:hover { translate: 0 0; scale: 1.07; }
+}
+.m-btn:active { scale: .96; translate: 0 0; }
+
+.mode-card.m-flash { animation: m-flash .9s var(--ease); }
+details > summary > .material-symbols-outlined { transition: transform .35s var(--ease); }
+
+/* --------------------------------------------------------------------------
+   6. Keyframes / one-offs (only when motion is welcome)
+   -------------------------------------------------------------------------- */
+@keyframes m-spin { to { transform: rotate(360deg); } }
+@keyframes m-flash {
+  0%   { box-shadow: 0 0 0 0 rgb(var(--accent) / .55); }
+  100% { box-shadow: 0 0 0 16px rgb(var(--accent) / 0); }
+}
+@keyframes m-open {
+  from { opacity: 0; translate: 0 -8px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+@keyframes m-dialog {
+  from { opacity: 0; translate: 0 24px; scale: .96; }
+  to   { opacity: 1; translate: 0 0; scale: 1; }
+}
+@keyframes m-fade { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  details[open] > p { animation: m-open .5s var(--ease); }
+  dialog[open] { animation: m-dialog .45s var(--ease); }
+  dialog[open]::backdrop { animation: m-fade .4s ease-out; }
+  @view-transition { navigation: auto; }
+}
+html.m-leaving body { opacity: 0; transition: opacity .22s ease-in; }
+
+/* --------------------------------------------------------------------------
+   7. Safety nets
+   -------------------------------------------------------------------------- */
+html.m-fail [data-m] {
+  opacity: 1 !important; translate: none !important; scale: none !important;
+  rotate: none !important; clip-path: none !important;
+}
+html.m-fail [data-m="words"] .m-wi { translate: none !important; rotate: none !important; }
+html.m-fail [data-m-card] { --cp: 1 !important; }
+html.m-fail [data-m-surface] { clip-path: none !important; }
+html.m-fail .m-window { --dp: 1 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-m-aura]::before { animation: none; }
+}

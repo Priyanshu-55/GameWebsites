@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy | Winding Arrows</title>
+  <meta name="description" content="Privacy Policy for the mobile game Winding Arrows. The same text as in the app.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; --bg: #1B1E23; --card: #24272E; --text: #fff; --muted: #B8C0CA; --line: #3B3F49; --accent: #B44CFF; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: "Nunito Sans", sans-serif; line-height: 1.65; }
+    header, main, footer { width: min(760px, calc(100% - 2rem)); margin-inline: auto; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 0; }
+    a { color: var(--accent); }
+    h1, h2 { font-family: Fredoka, sans-serif; line-height: 1.2; }
+    h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0.2rem 0 0.5rem; }
+    h2 { font-size: 1.35rem; margin: 2rem 0 0.4rem; }
+    .kicker { letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; font-weight: 800; color: var(--accent); }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 1.5rem; }
+    footer { padding: 2rem 0 3rem; color: var(--muted); font-size: 0.9rem; }
+    nav { display: flex; gap: 1rem; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/"><img src="/assets/logo_sideby.png" alt="Winding Arrows" style="height:56px;width:auto"></a>
+    <nav>
+      <a href="/delete-account">Delete account</a>
+      <a href="/#about">Contact</a>
+    </nav>
+  </header>
+  <main class="card">
+    <p class="kicker">Privacy Policy</p>
+    <h1>Winding Arrows</h1>
+    <p>This policy explains how the mobile game Winding Arrows handles information on Android and iOS. The same text is published at <a href="/privacy">/privacy</a>. Privacy requests go to <a href="mailto:tsgamings2dio@gmail.com">tsgamings2dio@gmail.com</a>.</p>
+    <p>Winding Arrows is made for a general audience. It is not directed at children under 13. That does not mean a child can never open the game.</p>
+
+    <h2>Information you provide</h2>
+    <p>You choose a display name of up to 18 characters and an avatar. Other players can see that name and avatar during an online match.</p>
+    <p>If you tap Google, the game asks Google for your email address and basic profile so Firebase Authentication can sign you in. We never receive your Google password. Firebase, operated by Google, keeps that sign-in record, and that record can include the email address Google returns. The progress document we store does not contain your email address. It is filed under your Google account id.</p>
+    <p>If you tap Guest, campaign progress stays in storage on that device. We do not upload that campaign progress to the game save. Clearing the app's storage, or reinstalling without a device backup, removes it and the next guest session is a new one. If the phone or tablet backup is turned on, the device maker may include the app's local storage in that backup. That backup is controlled by the device, not by our save upload. A guest who plays online gets a separate online profile, described under Online play. That profile is tied to an anonymous sign-in id for that install. It is not restored as a Google save after a reinstall.</p>
+
+    <h2>Google progress save</h2>
+    <p>A phone already tied to your Google account uploads progress once when the app opens and once when you leave the app. Coins, store purchases, and level clears during play are not sent one by one. The save contains your display name, avatar, coins, power-ups, chests, chest-video counts, daily-reward streak and dates, spin dates, whether the join bonus was claimed, cleared levels, and the last collection and level you opened. It is stored in Cloud Firestore in the United States.</p>
+    <p>A copy of that progress, plus sound, music, vibration, theme, and language settings, also stays on the device until you uninstall the app or clear its storage.</p>
+
+    <h2>Online play</h2>
+    <p>When you start an online match, the game writes a profile in Cloud Firestore under the Firebase sign-in id. The profile can include display name, avatar, virtual match coins, wins, losses, and matches played. This applies to a Google player and to a guest who enters online play. Other signed-in players can see your display name and win count on the in-game leaderboard. They cannot read your coin balance from that board.</p>
+    <p>A finished match can store both players' ids, both scores, the winner, and the match length. Only those two players can read that history record. A match-board record with the host's sign-in id, the puzzle seed, and the point totals can be read by any signed-in player.</p>
+    <p>While a match is waiting for an opponent, a signed-in player can see that waiting match so someone can join. After both players are in, the live match is limited to those two players. During play, Firebase Realtime Database in the United States receives your display name, avatar, moves, scores, and connection timing so both phones stay in sync. The match entry fee is virtual coins, not money.</p>
+
+    <h2>Photos</h2>
+    <p>Create Challenge can open a photo you pick from your library or files. The image is processed on the device to build a puzzle. We do not upload it. The game does not use the camera, microphone, contacts, or your location. Android may ask to read images or older storage so you can pick a file. On iOS the photo prompt says: "Choose a photo to turn into a challenge map." Vibration is used only for haptic feedback and is not stored.</p>
+
+    <h2>Advertising</h2>
+    <p>Winding Arrows uses Google Mobile Ads to show rewarded videos, a rewarded break between levels, and native ads on collection screens.</p>
+    <p>Google Mobile Ads and its partners may collect and process advertising identifiers, IP addresses, device and account identifiers, interactions with ads and the game (including taps and video views), and diagnostic information. They may use that information to deliver ads, measure ads, personalize ads where you have allowed it, prevent fraud, and run related advertising services. What they collect depends on the device, the ad settings, and your consent choice.</p>
+    <p>Where Google requires it, including in the EEA, the UK, and Switzerland, a consent message is shown before an ad is requested. The game does not add a second analytics or crash-reporting SDK. Google's own ad and Firebase software can still process the information described here. That is not the same as having no data collection.</p>
+    <p>On Android you can reset or delete the advertising ID in the system settings. On iOS, ad tracking follows Apple's settings. For Google's own practices, see <a href="https://policies.google.com/privacy">https://policies.google.com/privacy</a>. We do not sell personal information.</p>
+
+    <h2>Updates</h2>
+    <p>On Android, the game can ask Google Play if a newer version is required and can start that update. Google Play handles the download. On both platforms the game also reads a public minimum-version setting from Firebase. Those checks are not written into your progress save. The connection itself can still send ordinary network data, such as an IP address, to Google.</p>
+
+    <h2>Store</h2>
+    <p>The in-game store spends virtual coins. It does not take a card, bank, or other real-money payment.</p>
+
+    <h2>Who receives information</h2>
+    <p>Google Firebase runs sign-in, the progress save, online profiles, the leaderboard, and live matches. Google Mobile Ads serves ads. Google Play can deliver an Android update. Other players see your display name and avatar in a match. Signed-in players can see your display name and wins on the leaderboard, and any signed-in player can read a match-board record as described above. We do not sell personal information.</p>
+
+    <h2>Security</h2>
+    <p>Information sent to Google is encrypted in transit. Encryption reduces risk. It does not guarantee that information can never be lost, misused, or accessed without permission.</p>
+
+    <h2>How long it is kept</h2>
+    <p>The Google progress save, online profile, leaderboard row, and match records we can tie to you stay until a deletion request is finished, or until the feature is shut down. Data on the device stays until you uninstall the app or clear its storage. Signing out ends the session on that device. It does not delete the Google progress save or the online profile.</p>
+
+    <h2>Access and deletion</h2>
+    <p>Email <a href="mailto:tsgamings2dio@gmail.com">tsgamings2dio@gmail.com</a> with the subject "Winding Arrows privacy", or use the form at <a href="/delete-account">/delete-account</a>. You can ask what we hold or ask us to delete it. For a Google progress save, use the Google account you play with and, if you can, the display name on the save. For online play, include the display name on that profile.</p>
+    <p>We will delete the live records we can identify from that request within 30 days. That includes the Google progress save, the online profile, the leaderboard row, match history and settlement records for matches we can tie to you, a match-board record hosted by you, and the Firebase sign-in we created for the game. We will not restore a deleted account from our own database backup into the live game.</p>
+    <p>We do not control how long Google keeps advertising logs or the Google account itself. A backup made by your phone or tablet can keep a local copy until that device's backup service removes it. Guest campaign data that never left the device is removed by uninstalling the app or clearing its storage.</p>
+
+    <h2>Children</h2>
+    <p>We do not knowingly collect personal information from children under 13. If you believe a child has given us information, email us and we will delete it.</p>
+
+    <h2>Changes</h2>
+    <p>When this policy changes, the copy in the game and the copy at <a href="/privacy">/privacy</a> are replaced together. The text in the game is the same text as that page.</p>
+
+    <h2>Contact</h2>
+    <p><a href="mailto:tsgamings2dio@gmail.com">tsgamings2dio@gmail.com</a></p>
+  </main>
+  <footer>
+    <a href="/">Home</a> · <a href="/delete-account">Delete account</a> · <a href="mailto:tsgamings2dio@gmail.com">Contact</a>
+  </footer>
+</body>
+</html>
